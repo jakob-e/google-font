@@ -16,11 +16,7 @@
 @function ___gf-list-unique($list) { $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); } } @return $result; } 
 @function ___gf-list-merge($lists...) { $result: ___gf-list-unique(__gf-list-flatten($lists)); @return $result; }
 @function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if str-length($delimiter) == 0 { @for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
-
-// 
 // Map helper functions  
-// If SassyLists is imported we switch to the original 
-// 
 @function __gf-str-replace($arglist...) { @return str-replace($arglist...); }
 @function __gf-list-flatten($arglist...){ @return if(function-exists(sl-flatten), sl-flatten($arglist...), ___gf-flatten($arglist...)); }
 @function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($list) ); }
@@ -28,7 +24,7 @@
 @function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-merge($arglist...)); }
 
 
-
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
 //  General notes: 
 // 
@@ -43,6 +39,7 @@
 //  $google-font-subsets map.
 //
 
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
 //  Google font subsets (true = enabled)
 //  By default google will deliver Latin
@@ -64,7 +61,7 @@ $google-font-subsets: (
 , 'vietnamese'  :false
 );
 
-
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 // 
 //  Google font list and context (internal use only) 
 //
@@ -72,6 +69,7 @@ $__gf: () !default;
 $__gf-combine: false !default; 
 
 
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
 //  Google Font Mixin
 //  $name    : The name of the font
