@@ -1,4 +1,3 @@
-ASCSSembly
+Google Font a SCSS Mixin
 ==========
 
-Just an idea - nothing special yet ;)
