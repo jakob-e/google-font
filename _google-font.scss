@@ -1,0 +1,202 @@
+@import 'SassyLists';
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+//
+//  Google Font Mixin – v. 1.0.0 beta
+//
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+//
+//  Helper functions by Hugo Giraudel 
+//  Shamelessly Ripped and Ruined Sassy List Functions 
+//  Don't use – go get the real thing: http://sassylists.com/
+// 
+//  Note! - if SassyLists is imported we switch to the real deal     
+//     
+@function str-replace($string, $search, $replace: '') {$index: str-index($string, $search); @if $index { @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace); }@return $string; }
+@function ___gf-list-flatten($list) { $result: (); @each $item in $list { @if length($list) > 1{ $flatten: ___gf-list-flatten($item); @each $i in $flatten { $result: append($result, $i, list-separator($list)); } } @else { $result: append($result, $item, list-separator($list));} } @return $result;} 
+@function ___gf-list-unique($list) { $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); } } @return $result; } 
+@function ___gf-list-merge($lists...) { $result: ___gf-list-unique(__gf-list-flatten($lists)); @return $result; }
+@function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if str-length($delimiter) == 0 { @for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
+
+// 
+// Map helper functions  
+// If SassyLists is imported we switch to the original 
+// 
+@function __gf-str-replace($arglist...) { @return str-replace($arglist...); }
+@function __gf-list-flatten($arglist...){ @return if(function-exists(sl-flatten), sl-flatten($arglist...), ___gf-flatten($arglist...)); }
+@function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($list) ); }
+@function __gf-list-merge($arglist...)  { @return if(function-exists(sl-union), sl-union($arglist...), ___gf-list-merge($arglist...)); }
+@function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-merge($arglist...)); }
+
+
+
+//
+//  General notes: 
+// 
+//  If a text value is passed we can't add it to      
+//  a combined request – as it will affect all.
+//  Also we do not need a subset
+//
+//  Subsets are treated as globals why you only
+//  need to add it once in a combined request.
+//  Though it is possible to define subsets in 
+//  the mixin it is recommended to use the 
+//  $google-font-subsets map.
+//
+
+//
+//  Google font subsets (true = enabled)
+//  By default google will deliver Latin
+//  Why it is only required if needed in
+//  combination with another subset
+// 
+$google-font-subsets: (
+  'arabic'      :false
+, 'cyrillic'    :false
+, 'cyrillic-ext':false
+, 'devanagari'  :false
+, 'freek'       :false
+, 'greek-ext'   :false
+, 'hebrew'      :false
+, 'khmer'       :false
+, 'latin'       :false  
+, 'latin-ext'   :false
+, 'telugu'      :false
+, 'vietnamese'  :false
+);
+
+
+// 
+//  Google font list and context (internal use only) 
+//
+$__gf: () !default;
+$__gf-combine: false !default; 
+
+
+//
+//  Google Font Mixin
+//  $name    : The name of the font
+//  $weight  : Font weight 100-900 (default 400)   
+//  $style   : Font style normal/italic/oblique (default normal)
+//  $subset  : Font subsets 
+//  $text    : Reduce font to these characters ()
+@mixin google-font(
+    $name: null,     // string
+    $weight: 400,    // number
+    $style: normal,  // string
+    $subset: null,   // list or quoted string
+    $text: null      // quoted string   
+    ){
+      
+        //
+        // Base url 
+        // 
+        $URL: 'http://fonts.googleapis.com/css?family=';
+
+        //
+        // Add font to list or print out @import
+        //
+        @if $name {
+          
+            //
+            //  Clean up name, style and weight 
+            //
+            $name: __gf-str-replace(inspect(unquote($name)), ' ', '+'); 
+            $style: to-lower-case($style);
+            $weight: if($style == normal, $weight, $weight+$style);   
+            
+            //
+            //  If subset is passed as a string 
+            //  explode it into a list 
+            @if type-of($subset) == string {
+                $delimiter: if(str-index($subset, ','), ',', ' ');
+                $subset: __gf-list-explode($subset, $delimiter, comma);
+            }
+            // 
+            //  Add enabled subsets from $google-font-subsets
+            // 
+            @each $key, $value in $google-font-subsets {
+              @if $value { $subset: append($subset, $key); }
+            }             
+            
+            //
+            //  If not in a combine context or text value
+            //  is passed print out the @import. 
+            //  Else add the font as map to the global list 
+            //  
+            @if $__gf-combine == false or $text{
+                $weight: ':' + $weight;
+                $subset: if($subset and not $text, '&subset='+$subset, '');
+                $text  : if($text, '&text='+$text, '');
+                @import url(__gf-str-replace(#{$URL}#{$name}#{$weight}#{$subset},' ','')#{$text}); 
+            }@else {
+              $__gf: append($__gf, (name:$name, weight: $weight, subset: $subset)) !global;
+            }
+        } 
+        //
+        //  Combine
+        //
+        @else {
+          //
+          //  Enable combine context 
+          //
+          $__gf-combine: true !global;
+          
+          //
+          //  Nested mixins – now in a combine context
+          //
+          @content;
+          
+          //
+          //  Map to hold the combined fonts
+          //
+          $combine-map:();
+          
+          //
+          //  Loop through the global list and add
+          //  font map values to the combined map
+          //
+          @for $i from 1 through length($__gf){
+            //
+            //  Get the font map, name and already
+            //  mapped values
+            // 
+            $font  : nth($__gf,$i);
+            $name  : map-get($font, name);
+            $mapped: map-get($combine-map, $name);
+            //
+            //  If font is not mapped add it 
+            //  to the combined map
+            // 
+            @if not $mapped {
+              $combine-map: map-merge($combine-map, ($name: $font));
+            } 
+            //
+            //  If font is mapped merge weights and subsets  
+            //  with the existing values 
+            // 
+            @else {
+              $weight: map-get($font,weight);
+              $weight: __gf-list-merge(map-get($mapped,weight), $weight);
+              $subset: map-get($font,subset);
+              $subset: __gf-list-merge(map-get($mapped,subset), $subset);
+              $combine-map: map-merge($combine-map, ($name: (name:$name, weight: $weight, subset: $subset)));
+            }
+          }
+          //
+          //  Create the combined query string
+          //
+          $name-weight:'';
+          $subsets:();
+          @each $key, $value in $combine-map {
+            $name   : map-get($value, name);
+            $weight : map-get($value, weight);
+            $subset : map-get($value, subset);
+            $subsets: if($subset != null ,join($subsets, $subset, comma),$subsets);
+            $name-weight: $name-weight + if($name-weight =='','','|')+ $name + ':' + $weight;
+          }     
+          // 
+          $subset: if($subset != (null,), #{'&subset='$subsets},'');
+          @import url(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ','')); 
+          $__gf-combine: false !global;        
+        }
+}
