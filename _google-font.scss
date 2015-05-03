@@ -1,4 +1,3 @@
-
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
 //  Google Font Mixin – v. 1.0.0 beta
@@ -6,22 +5,27 @@
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
 //  Helper functions by Hugo Giraudel 
-//  Shamelessly Ripped and Ruined Sassy List Functions 
-//  Don't use – go get the real thing: http://sassylists.com/
+//  Shamelessly ripped Sassy List Functions 
+//  Go get the real thing: http://sassylists.com/
 // 
-//  Note! - if SassyLists is imported we switch to the real deal     
+//  Note! just import sassylists and google-font 
+//  will switch to this    
 //     
 @function str-replace($string, $search, $replace: '') {$index: str-index($string, $search); @if $index { @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace); }@return $string; }
-@function ___gf-list-flatten($list) { $result: (); @each $item in $list { @if length($list) > 1{ $flatten: ___gf-list-flatten($item); @each $i in $flatten { $result: append($result, $i, list-separator($list)); } } @else { $result: append($result, $item, list-separator($list));} } @return $result;} 
-@function ___gf-list-unique($list) { $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); } } @return $result; } 
-@function ___gf-list-merge($lists...) { $result: ___gf-list-unique(__gf-list-flatten($lists)); @return $result; }
-@function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if str-length($delimiter) == 0 { @for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
+@function ___gf-list-missing($functions...) {$missing-dependencies: (); @each $function in $functions { @if not function-exists($function) {$missing-dependencies: append($missing-dependencies, $function, comma); } } @return length($missing-dependencies) != 0; }
+@function ___gf-list-multival($list) { @return length($list) > 1; }
+@function ___gf-list-flatten($list) { @if ___gf-list-missing(___gf-list-multival) == true { @return null; } $result: (); @each $item in $list { @if ___gf-list-multival($item) { $flatten: ___gf-list-flatten($item); @each $i in $flatten { $result: append($result, $i, list-separator($list)); }} @else { $result: append($result, $item, list-separator($list)); }} @return $result;}
+@function ___gf-list-unique($list) { @if ___gf-list-missing(___gf-list-to-list) == true { @return null; } $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); }} @return ___gf-list-to-list($result); }
+@function ___gf-list-merge($lists...) { @if ___gf-list-missing(___gf-list-flatten, ___gf-list-unique) == true { @return null; } $result: ___gf-list-unique(___gf-list-flatten($lists)); @return $result; }
+@function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if not index("space" "comma", $separator) { $separator: "space"; }@if str-length($delimiter) == 0 {@for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
+@function ___gf-list-to-list($value, $separator: list-separator($value)) { @if type-of($value) != "list" or list-separator($value) != $separator { $new-list: if($separator == "comma", sl-comma-list(), ()); @each $item in $value { $new-list: append($new-list, $item, $separator); } @return $new-list; } @return $value; }
 // Map helper functions  
 @function __gf-str-replace($arglist...) { @return str-replace($arglist...); }
-@function __gf-list-flatten($arglist...){ @return if(function-exists(sl-flatten), sl-flatten($arglist...), ___gf-flatten($arglist...)); }
-@function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($list) ); }
+@function __gf-list-flatten($arglist...){ @return if(function-exists(sl-flatten), sl-flatten($arglist...), ___gf-list-flatten($arglist...)); }
+@function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($arglist...)); }
 @function __gf-list-merge($arglist...)  { @return if(function-exists(sl-union), sl-union($arglist...), ___gf-list-merge($arglist...)); }
-@function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-merge($arglist...)); }
+@function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-explode($arglist...)); }
+
 
 
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
@@ -84,7 +88,13 @@ $__gf-combine: false !default;
     $subset: null,   // list or quoted string
     $text: null      // quoted string   
     ){
-      
+    
+        //
+        // TODO - Add parser to handle positional arguments 
+        // and keywords (switch to arglist...) 
+        // 
+    
+    
         //
         // Base url 
         // 
@@ -124,10 +134,29 @@ $__gf-combine: false !default;
             @if $__gf-combine == false or $text{
                 $weight: ':' + $weight;
                 $subset: if($subset and not $text, '&subset='+$subset, '');
-                $text  : if($text, '&text='+$text, '');
+    
+                //
+                //  Encode special characters
+                //
+                @if $text {
+                    $encode:('!':'%21','#':'%23','$':'%24','&':'%26','\'':'%27',
+                             '(':'%28',')':'%29','*':'%2A','+':'%2B',',':'%2C',
+                             '/':'%2F',':':'%3A',';':'%3B','=':'%3D','?':'%3F',
+                             '@':'%40','[':'%5B',']':'%5D',' ':'%20');
+                    $chars : __gf-list-unique(__gf-list-explode($text));
+                    $text: '';
+                    @for $i from 1 through length($chars){ 
+                        $replace: map-get($encode, nth($chars,$i));
+                        $text: $text + if($replace, $replace, nth($chars,$i));
+                    }
+                    $text:'&text='+$text
+                } @else {
+                    $text:'';    
+                }
+    
                 @import url(__gf-str-replace(#{$URL}#{$name}#{$weight}#{$subset},' ','')#{$text}); 
             }@else {
-              $__gf: append($__gf, (name:$name, weight: $weight, subset: $subset)) !global;
+              $__gf: append($__gf, (name:$name, weight: $weight, subset: if($subset,$subset,()))) !global;
             }
         } 
         //
@@ -189,12 +218,13 @@ $__gf-combine: false !default;
             $name   : map-get($value, name);
             $weight : map-get($value, weight);
             $subset : map-get($value, subset);
-            $subsets: if($subset != null ,join($subsets, $subset, comma),$subsets);
+            $subsets: if($subset, join($subsets, $subset, comma), $subsets);
             $name-weight: $name-weight + if($name-weight =='','','|')+ $name + ':' + $weight;
           }     
-          // 
-          $subset: if($subset != (null,), #{'&subset='$subsets},'');
+          $subset: #{'&subset='+$subsets};
+          $subset: if($subset == '&subset=','',$subset);
           @import url(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ','')); 
           $__gf-combine: false !global;        
         }
 }
+    
