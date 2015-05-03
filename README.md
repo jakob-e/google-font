@@ -83,3 +83,12 @@ $google-font-subsets: (
 
     
 </pre>
+
+
+Dependencies
+
+Google font will work with Ruby Sass 3.3+ (LibSass is on the to-do-list).
+
+Google font does not require other imports – but as the list helper functions are shamelessly ripped from SassyLists by Hugo Giraudel it is recommeded you import the original. By importing (SassyLists)[SassyLists] google-font will automatically switch to the real deal.
+
+
