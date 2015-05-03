@@ -1,4 +1,4 @@
-Google Font a SCSS Mixin
+Google Font SCSS Mixin
 ==========
 
 
