@@ -23,8 +23,8 @@ Google-font is intended to provide a simple structured way to import google font
   @include google-font(Lato, 400, italic);        
   
   //  CSS output:
-  //  @import url(http://fonts.googleapis.com/css?family=Lato:300);
-  //  @import url(http://fonts.googleapis.com/css?family=Lato:400italic);        
+  //  @import url(//fonts.googleapis.com/css?family=Lato:300);
+  //  @import url(//fonts.googleapis.com/css?family=Lato:400italic);        
           
           
           
@@ -51,8 +51,8 @@ Google-font is intended to provide a simple structured way to import google font
   //  CSS output:
   //  Note! Marck Script is limited to specific characters why it is  
   //        excluded from the combined request.          
-  //  @import url(http://fonts.googleapis.com/css?family=Marck+Script:400&text=F);
-  //  @import url(http://fonts.googleapis.com/css?family=Lato:300,400|Open+Sans:300,400,800,300italic);
+  //  @import url(//fonts.googleapis.com/css?family=Marck+Script:400&text=F);
+  //  @import url(//fonts.googleapis.com/css?family=Lato:300,400|Open+Sans:300,400,800,300italic);
 
 
 </pre>
