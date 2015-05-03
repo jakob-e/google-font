@@ -1,4 +1,6 @@
-Google Font SCSS Mixin
+<img src="https://cloud.githubusercontent.com/assets/1699461/7445906/6f47b680-f1c6-11e4-90b8-55185e2a48ed.png" />
+
+
 ==========
 Google-font is intended to provide a simple structured way to import google fonts while doing font request optimization under the hood.
 
