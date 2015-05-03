@@ -2,12 +2,12 @@ Google Font SCSS Mixin
 ==========
 Google-font is intended to provide a simple structured way to import google fonts while doing font request optimization under the hood.
 
+**Multi-use syntax**
 <pre>
-
 @import '_google-font.scss';
   // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   //        
-  //  Import syntax:
+  //  **Import syntax:**
   //        
   //  $name  :  Font name
   //  $weight:  Font weight 100 - 900 (default: 400)       
@@ -28,7 +28,7 @@ Google-font is intended to provide a simple structured way to import google font
           
   // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   //        
-  //  Combine syntax:   
+  //  **Combine syntax:**   
   //        
   //  @include google-font {
   //      @include google-font($name, [$weight, $style, $subset, $text]);
