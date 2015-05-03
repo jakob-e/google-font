@@ -113,17 +113,17 @@ $__gf-combine: false !default;
             $weight: if($style == normal, $weight, $weight+$style);   
             
             //
-            //  If subset is passed as a string 
-            //  explode it into a list 
+            //  If subset is passed as a string explode it into a list 
+            //
             @if type-of($subset) == string {
                 $delimiter: if(str-index($subset, ','), ',', ' ');
-                $subset: __gf-list-explode($subset, $delimiter, comma);
+                $subset: __gf-list-explode($subset, $delimiter);
             }
             // 
             //  Add enabled subsets from $google-font-subsets
-            // 
+            //
             @each $key, $value in $google-font-subsets {
-              @if $value { $subset: append($subset, $key); }
+              @if $value { $subset: append($subset, unquote($key), comma); }
             }             
             
             //
@@ -133,8 +133,7 @@ $__gf-combine: false !default;
             //  
             @if $__gf-combine == false or $text{
                 $weight: ':' + $weight;
-                $subset: if($subset and not $text, '&subset='+$subset, '');
-    
+                $subset: if($subset and $subset !=() and not $text, '&subset='+$subset, '');
                 //
                 //  Encode special characters
                 //
@@ -153,10 +152,10 @@ $__gf-combine: false !default;
                 } @else {
                     $text:'';    
                 }
-    
                 @import url(__gf-str-replace(#{$URL}#{$name}#{$weight}#{$subset},' ','')#{$text}); 
             }@else {
-              $__gf: append($__gf, (name:$name, weight: $weight, subset: if($subset,$subset,()))) !global;
+              $subset: if($subset, $subset, null);
+              $__gf: append($__gf, (name:$name, weight: $weight, subset: $subset)) !global;
             }
         } 
         //
@@ -202,10 +201,14 @@ $__gf-combine: false !default;
             //  with the existing values 
             // 
             @else {
-              $weight: map-get($font,weight);
-              $weight: __gf-list-merge(map-get($mapped,weight), $weight);
-              $subset: map-get($font,subset);
-              $subset: __gf-list-merge(map-get($mapped,subset), $subset);
+              $weight: map-get($font, weight);
+              @if $weight {
+                $weight: __gf-list-merge(map-get($mapped, weight), $weight);
+              }
+              $subset: map-get($font, subset);
+              @if $subset {
+                $subset: __gf-list-merge(map-get($mapped,subset), $subset);
+              }
               $combine-map: map-merge($combine-map, ($name: (name:$name, weight: $weight, subset: $subset)));
             }
           }
@@ -218,13 +221,15 @@ $__gf-combine: false !default;
             $name   : map-get($value, name);
             $weight : map-get($value, weight);
             $subset : map-get($value, subset);
-            $subsets: if($subset, join($subsets, $subset, comma), $subsets);
+            @for $i from 1 through length($subset){
+              @if nth($subset, $i) and not index($subsets, nth($subset, $i)){
+                $subsets: append($subsets, nth($subset, $i), comma);
+              }
+            }
+            $subset: if($subsets and $subsets !=(), '&subset='+$subsets, '');
             $name-weight: $name-weight + if($name-weight =='','','|')+ $name + ':' + $weight;
           }     
-          $subset: #{'&subset='+$subsets};
-          $subset: if($subset == '&subset=','',$subset);
-          @import url(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ','')); 
+              @import url(__gf-str-replace(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ',''),'"','')); 
           $__gf-combine: false !global;        
         }
 }
-    
