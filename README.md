@@ -2,7 +2,7 @@ Google Font SCSS Mixin
 ==========
 Google-font is intended to provide a simple structured way to import google fonts while doing font request optimization under the hood.
 
-<pre>
+<code>
 
 @import '_google-font.scss';
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -51,4 +51,4 @@ Google-font is intended to provide a simple structured way to import google font
 //        excluded from the combined request.          
 //  @import url(http://fonts.googleapis.com/css?family=Marck+Script:400&text=F);
 //  @import url(http://fonts.googleapis.com/css?family=Lato:300,400|Open+Sans:300,400,800,300italic);
-</pre>
+</code>
