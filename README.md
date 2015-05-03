@@ -7,7 +7,7 @@ Google-font is intended to provide a simple structured way to import google font
 @import '_google-font.scss';
   // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   //        
-  //  **Import syntax:**
+  //  Import syntax:
   //        
   //  $name  :  Font name
   //  $weight:  Font weight 100 - 900 (default: 400)       
@@ -28,7 +28,7 @@ Google-font is intended to provide a simple structured way to import google font
           
   // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   //        
-  //  **Combine syntax:**   
+  //  Combine syntax: 
   //        
   //  @include google-font {
   //      @include google-font($name, [$weight, $style, $subset, $text]);
@@ -51,4 +51,35 @@ Google-font is intended to provide a simple structured way to import google font
   //        excluded from the combined request.          
   //  @import url(http://fonts.googleapis.com/css?family=Marck+Script:400&text=F);
   //  @import url(http://fonts.googleapis.com/css?family=Lato:300,400|Open+Sans:300,400,800,300italic);
+
+
+</pre>
+
+
+**Subsets**
+
+Though it is possible to define subsets in the mixin it is recommended to handle this globally using the $google-font-subset map
+<pre>
+// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''        
+//
+//  Subsets (true = enabled)
+//  Note! by default google will deliver a Latin font why you only
+//  need to enable it if used in combination with another subset.
+//    
+$google-font-subsets: (
+    'arabic'      :false
+  , 'cyrillic'    :false
+  , 'cyrillic-ext':false
+  , 'devanagari'  :false
+  , 'freek'       :false
+  , 'greek-ext'   :false
+  , 'hebrew'      :false
+  , 'khmer'       :false
+  , 'latin'       :false  
+  , 'latin-ext'   :false
+  , 'telugu'      :false
+  , 'vietnamese'  :false
+);    
+
+    
 </pre>
