@@ -2,7 +2,7 @@ Google Font a SCSS Mixin
 ==========
 
 
-´´´´SCSS
+<pre>
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 //        
 //  Import syntax:
@@ -49,4 +49,4 @@ Google Font a SCSS Mixin
 //        excluded from the combined request.          
 //  @import url(http://fonts.googleapis.com/css?family=Marck+Script:400&text=F);
 //  @import url(http://fonts.googleapis.com/css?family=Lato:300,400|Open+Sans:300,400,800,300italic);
-´´´´SCSS
+</pre>
