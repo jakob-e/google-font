@@ -86,6 +86,23 @@ $google-font-subsets: (
     
 </pre>
 
+**Request optimized font**
+
+If you only need to style a few letters pass the ones you need using $text. This allows Google to return a font file that's optimized for your request. In some cases, this can reduce the size of the font file by up to 90%. Google-font will handle encoding and remove redundancies.
+<pre>
+// ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' 
+//        
+//  Request optimized font
+//        
+@include google-font(Open Sans, 800, $text:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');  
+        
+//  CSS output:
+//  @import url(//fonts.googleapis.com/css?family=Open+Sans:800&text=Lorem%20ipsudlta%2Ccngbq.Uvx);
+
+        
+    
+
+</pre>
 **Dependencies**
 
 Google font will work with Ruby Sass 3.3+ (LibSass is on the to-do-list).
