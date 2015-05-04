@@ -231,7 +231,7 @@ $__gf-combine: false !default;
           }     
               @import url(__gf-str-replace(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ',''),'"','')); 
           $__gf-combine: false !global;  
-          $__gf() !global;
+          $__gf: () !global;
         }
 }
     
