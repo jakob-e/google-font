@@ -73,7 +73,7 @@ $google-font-subsets: (
   , 'cyrillic'    :false
   , 'cyrillic-ext':false
   , 'devanagari'  :false
-  , 'freek'       :false
+  , 'greek'       :false
   , 'greek-ext'   :false
   , 'hebrew'      :false
   , 'khmer'       :false
