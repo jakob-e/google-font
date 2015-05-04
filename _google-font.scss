@@ -1,6 +1,6 @@
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
-//  Google Font Mixin – v. 1.0.2 beta
+//  Google Font Mixin – v. 1.0.3 beta
 //
 // '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 //
@@ -55,7 +55,7 @@ $google-font-subsets: (
 , 'cyrillic'    :false
 , 'cyrillic-ext':false
 , 'devanagari'  :false
-, 'greek'       :false
+, 'freek'       :false
 , 'greek-ext'   :false
 , 'hebrew'      :false
 , 'khmer'       :false
@@ -230,6 +230,8 @@ $__gf-combine: false !default;
             $name-weight: $name-weight + if($name-weight =='','','|')+ $name + ':' + $weight;
           }     
               @import url(__gf-str-replace(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ',''),'"','')); 
-          $__gf-combine: false !global;        
+          $__gf-combine: false !global;  
+          $__gf() !global;
         }
 }
+    
