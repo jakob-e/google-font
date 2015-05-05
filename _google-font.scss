@@ -1,237 +1,267 @@
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-//
-//  Google Font Mixin – v. 1.0.3 beta
-//
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-//
-//  Helper functions by Hugo Giraudel 
-//  Shamelessly ripped Sassy List Functions 
-//  Go get the real thing: http://sassylists.com/
-// 
-//  Note! just import sassylists and google-font 
-//  will switch to this    
-//     
-@function str-replace($string, $search, $replace: '') {$index: str-index($string, $search); @if $index { @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace); }@return $string; }
-@function ___gf-list-missing($functions...) {$missing-dependencies: (); @each $function in $functions { @if not function-exists($function) {$missing-dependencies: append($missing-dependencies, $function, comma); } } @return length($missing-dependencies) != 0; }
-@function ___gf-list-multival($list) { @return length($list) > 1; }
-@function ___gf-list-flatten($list) { @if ___gf-list-missing(___gf-list-multival) == true { @return null; } $result: (); @each $item in $list { @if ___gf-list-multival($item) { $flatten: ___gf-list-flatten($item); @each $i in $flatten { $result: append($result, $i, list-separator($list)); }} @else { $result: append($result, $item, list-separator($list)); }} @return $result;}
-@function ___gf-list-unique($list) { @if ___gf-list-missing(___gf-list-to-list) == true { @return null; } $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); }} @return ___gf-list-to-list($result); }
-@function ___gf-list-merge($lists...) { @if ___gf-list-missing(___gf-list-flatten, ___gf-list-unique) == true { @return null; } $result: ___gf-list-unique(___gf-list-flatten($lists)); @return $result; }
-@function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if not index("space" "comma", $separator) { $separator: "space"; }@if str-length($delimiter) == 0 {@for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
-@function ___gf-list-to-list($value, $separator: list-separator($value)) { @if type-of($value) != "list" or list-separator($value) != $separator { $new-list: if($separator == "comma", sl-comma-list(), ()); @each $item in $value { $new-list: append($new-list, $item, $separator); } @return $new-list; } @return $value; }
-// Map helper functions  
-@function __gf-str-replace($arglist...) { @return str-replace($arglist...); }
-@function __gf-list-flatten($arglist...){ @return if(function-exists(sl-flatten), sl-flatten($arglist...), ___gf-list-flatten($arglist...)); }
-@function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($arglist...)); }
-@function __gf-list-merge($arglist...)  { @return if(function-exists(sl-union), sl-union($arglist...), ___gf-list-merge($arglist...)); }
-@function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-explode($arglist...)); }
+  // _________________________________________________________________
+  //
+  //  Google Font v.1.2
+  //  
+  // _________________________________________________________________
+  //
+  //
+  // _________________________________________________________________
+  //
+  //  Gonfig
+  // _________________________________________________________________
+  // 
+  //  To provide flexibility google-font can be set to handle multiple 
+  //  fonts, weights and styles in one include. This does not affect 
+  //  the output compared with individual includes (recommended). 
+  //
+  //  You can en-/disable each feature individually.
+  //  Be aware of output as all combinations will be added to the import. 
+  //  Also note that when multi-fonts is enabled all multi word font names
+  //  like Open Sans must be quoted 'Open Sans'
+  // 
+  //  By default only multiple weights are allowed as it is what  
+  //  is most likely to be used and does not cause unforseen 
+  //  output combinations (and heavy load)
+  // 
+  //  @import google-font(Open Sans, 300 400 600);
+  //  @import google-font(Open Sans, 300 400 600, italic);
+  //
+  $google-font-enable-multi-fonts  : false !default;
+  $google-font-enable-multi-weights: true  !default;
+  $google-font-enable-multi-styles : false !default;
+  //
+  //  To ease the job of handling subsets it is recommended you use the 
+  //  $google-font-subsets map. Simply switch the value to true and the 
+  //  subset will be added to all your imports
+  // 
+  $google-font-subsets: (
+      'arabic'      :false
+    , 'cyrillic'    :false
+    , 'cyrillic-ext':false
+    , 'devanagari'  :false
+    , 'greek'       :false
+    , 'greek-ext'   :false
+    , 'hebrew'      :false
+    , 'khmer'       :false
+    , 'latin'       :false  
+    , 'latin-ext'   :false
+    , 'telugu'      :false
+    , 'vietnamese'  :false
+  ) !default;  
 
 
 
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-//
-//  General notes: 
-// 
-//  If a text value is passed we can't add it to      
-//  a combined request – as it will affect all.
-//  Also we do not need a subset
-//
-//  Subsets are treated as globals why you only
-//  need to add it once in a combined request.
-//  Though it is possible to define subsets in 
-//  the mixin it is recommended to use the 
-//  $google-font-subsets map.
-//
 
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+// _________________________________________________________________
 //
-//  Google font subsets (true = enabled)
-//  By default google will deliver Latin
-//  Why it is only required if needed in
-//  combination with another subset
-// 
-$google-font-subsets: (
-  'arabic'      :false
-, 'cyrillic'    :false
-, 'cyrillic-ext':false
-, 'devanagari'  :false
-, 'freek'       :false
-, 'greek-ext'   :false
-, 'hebrew'      :false
-, 'khmer'       :false
-, 'latin'       :false  
-, 'latin-ext'   :false
-, 'telugu'      :false
-, 'vietnamese'  :false
-) !default;
+//  The Mixin
+// _________________________________________________________________
+@mixin google-font($name: null, $weight: 400, $style: normal, $text: null, $subset: null){
 
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-// 
-//  Google font list and context (internal use only) 
-//
-$__gf: () !default;
-$__gf-combine: false !default; 
-
-
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-//
-//  Google Font Mixin
-//  $name    : The name of the font
-//  $weight  : Font weight 100-900 (default 400)   
-//  $style   : Font style normal/italic/oblique (default normal)
-//  $subset  : Font subsets 
-//  $text    : Reduce font to these characters ()
-@mixin google-font(
-    $name: null,     // string
-    $weight: 400,    // number
-    $style: normal,  // string
-    $subset: null,   // list or quoted string
-    $text: null      // quoted string   
-    ){
+    $URL    : '//fonts.googleapis.com/css?family=';
+    $_name  : ();
+    $_weight: ();
+    $_style : ();
+    $_subset: ();
     
-        //
-        // TODO - Add parser to handle positional arguments 
-        // and keywords (switch to arglist...) 
-        // 
-    
-    
-        //
-        // Base url 
-        // 
-        $URL: '//fonts.googleapis.com/css?family=';
-
-        //
-        // Add font to list or print out @import
-        //
-        @if $name {
-          
-            //
-            //  Clean up name, style and weight 
-            //
-            $name: __gf-str-replace(inspect(unquote($name)), ' ', '+'); 
-            $style: to-lower-case($style);
-            $weight: if($style == normal, $weight, $weight+$style);   
-            
-            //
-            //  If subset is passed as a string explode it into a list 
-            //
-            @if type-of($subset) == string {
-                $delimiter: if(str-index($subset, ','), ',', ' ');
-                $subset: __gf-list-explode($subset, $delimiter);
-            }
-            // 
-            //  Add enabled subsets from $google-font-subsets
-            //
-            @each $key, $value in $google-font-subsets {
-              @if $value { $subset: append($subset, unquote($key), comma); }
-            }             
-            
-            //
-            //  If not in a combine context or text value
-            //  is passed print out the @import. 
-            //  Else add the font as map to the global list 
-            //  
-            @if $__gf-combine == false or $text{
-                $weight: ':' + $weight;
-                $subset: if($subset and $subset !=() and not $text, '&subset='+$subset, '');
-                //
-                //  Encode special characters
-                //
-                @if $text {
-                    $encode:('!':'%21','#':'%23','$':'%24','&':'%26','\'':'%27',
-                             '(':'%28',')':'%29','*':'%2A','+':'%2B',',':'%2C',
-                             '/':'%2F',':':'%3A',';':'%3B','=':'%3D','?':'%3F',
-                             '@':'%40','[':'%5B',']':'%5D',' ':'%20');
-                    $chars : __gf-list-unique(__gf-list-explode($text));
-                    $text: '';
-                    @for $i from 1 through length($chars){ 
-                        $replace: map-get($encode, nth($chars,$i));
-                        $text: $text + if($replace, $replace, nth($chars,$i));
-                    }
-                    $text:'&text='+$text
-                } @else {
-                    $text:'';    
-                }
-                @import url(__gf-str-replace(#{$URL}#{$name}#{$weight}#{$subset},' ','')#{$text}); 
-            }@else {
-              $subset: if($subset, $subset, null);
-              $__gf: append($__gf, (name:$name, weight: $weight, subset: $subset)) !global;
-            }
-        } 
-        //
-        //  Combine
-        //
-        @else {
-          //
-          //  Enable combine context 
-          //
-          $__gf-combine: true !global;
-          
-          //
-          //  Nested mixins – now in a combine context
-          //
-          @content;
-          
-          //
-          //  Map to hold the combined fonts
-          //
-          $combine-map:();
-          
-          //
-          //  Loop through the global list and add
-          //  font map values to the combined map
-          //
-          @for $i from 1 through length($__gf){
-            //
-            //  Get the font map, name and already
-            //  mapped values
-            // 
-            $font  : nth($__gf,$i);
-            $name  : map-get($font, name);
-            $mapped: map-get($combine-map, $name);
-            //
-            //  If font is not mapped add it 
-            //  to the combined map
-            // 
-            @if not $mapped {
-              $combine-map: map-merge($combine-map, ($name: $font));
-            } 
-            //
-            //  If font is mapped merge weights and subsets  
-            //  with the existing values 
-            // 
-            @else {
-              $weight: map-get($font, weight);
-              @if $weight {
-                $weight: __gf-list-merge(map-get($mapped, weight), $weight);
-              }
-              $subset: map-get($font, subset);
-              @if $subset {
-                $subset: __gf-list-merge(map-get($mapped,subset), $subset);
-              }
-              $combine-map: map-merge($combine-map, ($name: (name:$name, weight: $weight, subset: $subset)));
-            }
-          }
-          //
-          //  Create the combined query string
-          //
-          $name-weight:'';
-          $subsets:();
-          @each $key, $value in $combine-map {
-            $name   : map-get($value, name);
-            $weight : map-get($value, weight);
-            $subset : map-get($value, subset);
-            @for $i from 1 through length($subset){
-              @if nth($subset, $i) and not index($subsets, nth($subset, $i)){
-                $subsets: append($subsets, nth($subset, $i), comma);
-              }
-            }
-            $subset: if($subsets and $subsets !=(), '&subset='+$subsets, '');
-            $name-weight: $name-weight + if($name-weight =='','','|')+ $name + ':' + $weight;
-          }     
-              @import url(__gf-str-replace(__gf-str-replace(#{$URL}#{$name-weight}#{$subset},' ',''),'"','')); 
-          $__gf-combine: false !global;  
-          $__gf: () !global;
+    // _________________________________________________________________
+    // 
+    //  Import or add to font list
+    // _________________________________________________________________
+    @if $name {
+      @if $google-font-enable-multi-fonts   == false { $name: inspect(unquote($name)); }
+      @if $google-font-enable-multi-weights == false and type-of($weight) == list { $weight: nth($weight, 1); }      
+      @if $google-font-enable-multi-styles  == false and type-of($style) == list  { $style : nth($style,  1); }
+      @if type-of($name)   == string { $_name  : append((), $name,   comma); } 
+      @if type-of($name)   == list   { $_name  : join((),   $name,   comma); }
+      @if type-of($weight) == number { $_weight: append((), $weight, comma); } 
+      @if type-of($weight) == list   { $_weight: join((),   $weight, comma); }
+      @if type-of($style)  == string { $_style : append((), $style,  comma); } 
+      @if type-of($style)  == list   { $_style : join((),   $style,  comma); }    
+      @if type-of($subset) == string { $_subset: append((), $subset, comma); } 
+      @if type-of($subset) == list   { $_subset: join((),   $subset, comma); }
+      
+      // ------------------------------------------------
+      //  Name
+      // ------------------------------------------------
+      //  Replace spaces in font name with + and 
+      //  remove duplicates
+      // 
+      $_temp: ();
+      @for $i from 1 through length($_name){
+        $_temp: append($_temp, __gf-str-replace(#{unquote(nth($_name, $i))},' ','+'), comma)
+      }
+      $_name: __gf-list-unique($_temp);
+      
+      // ------------------------------------------------
+      //  Weight and style
+      // ------------------------------------------------
+      //  Add default weight and style if null
+      //  Concatinate weight and style if needed
+      //  Remove duplicates 
+      //
+      $_weight: if(length($_weight)>0, $_weight, (400));
+      $_style : if(length($_style)>0, $_style, (normal));
+      $_temp: ();
+      @for $i from 1 through length($_weight){
+        @for $j from 1 through length($_style){
+          $w: nth($_weight, $i); $s: nth($_style, $j);
+          $_temp: append($_temp, if($s == normal, $w, unquote($w+$s)), comma);   
         }
-}
-    
+      }
+      $_weight: __gf-list-unique($_temp);
+      
+      // ------------------------------------------------
+      //  Subsets
+      // ------------------------------------------------
+      //  Add enabled subsets and remove diplicates
+      //  if we are not requesting an optimized font
+      //
+      $_temp:();
+      @if length($_subset) > 0 {
+        @for $i from 1 through length($_subset){
+          $_temp: append($_temp, unquote(nth($_subset, $i)), comma);
+        }
+      }
+      @each $key, $value in $google-font-subsets {
+          @if $value { $_temp: append($_temp, unquote($key), comma); }
+      }
+      $_subset: __gf-list-unique($_temp);
+       
+      
+      // ------------------------------------------------
+      //  Text
+      // ------------------------------------------------
+      //  Remove duplicate characters and encode 
+      //    
+      @if $text {
+        $encode:('!':'%21','#':'%23','$':'%24','&':'%26','\'':'%27',
+                 '(':'%28',')':'%29','*':'%2A','+':'%2B',',':'%2C',
+                 '/':'%2F',':':'%3A',';':'%3B','=':'%3D','?':'%3F',
+                 '@':'%40','[':'%5B',']':'%5D',' ':'%20');
+        $chars : __gf-list-unique(__gf-list-explode($text));
+        $text: '';
+        @for $i from 1 through length($chars){ 
+            $replace: map-get($encode, nth($chars,$i));
+            $text: $text + if($replace, $replace, nth($chars,$i));
+        }
+      }
+      
+      // ------------------------------------------------
+      //  Create single import query
+      // ------------------------------------------------
+      @if $__gf-combine == false or $text { 
+        $query:'';
+        @for $i from 1 through length($_name){
+          $query: #{$query}#{if($i > 1,'|','')};
+          $query: #{$query}#{nth($_name, $i)};
+          $query: #{$query}#{':'+$_weight};
+        }
+        //  We don't need subset when passing text
+        @if not $text {
+          $query: #{$query}#{if(length($_subset) > 1,#{'&subset='+$_subset},'')};
+        } @else {
+          $query: #{$query}#{'&text='+$text};            
+        }
+        
+        // Remove spaces 
+        $query: __gf-str-replace($query, ' ','');
+        
+        // Create single import
+        @import url(#{$URL}#{$query});
+      }
+      
+      // ------------------------------------------------
+      //  Push to font list to combine
+      // ------------------------------------------------        
+      @else {
+        @for $i from 1 through length($_name){
+          $__gf-list: append($__gf-list, (name: nth($_name, $i), weight:$_weight, subset: $_subset), comma) !global;  
+        }
+      }
+    }
+
+    // _________________________________________________________________
+    // 
+    //  Combined import 
+    // 
+    // _________________________________________________________________
+
+    @elseif length($__gf-list) > 0 {
+      // ------------------------------------------------
+      // Set combine marker and include nested 
+      // content (now in a combine syntax)
+      // ------------------------------------------------
+      $__gf-combine: true !global;
+      @content;
+      
+      
+      // ------------------------------------------------      
+      //  Loop throug each item in the font list and
+      //  merge values with already mapped values 
+      // ------------------------------------------------
+      //  Map to hold combined fonts
+      $combine-map:();
+      @for $i from 1 through length($__gf-list){
+        $font  : nth($__gf-list, $i);
+        $name  : map-get($font, name);  
+        $mapped: map-get($combine-map, to-lower-case($name));
+        $_weight: join(if($mapped,map-get($mapped, weight),()), map-get($font, weight), comma);
+        $_subset: join(if($mapped,map-get($mapped, subset),()), map-get($font, subset), comma);
+        $combine-map: map-merge($combine-map, (to-lower-case($name):(name: $name, weight: __gf-list-unique($_weight), subset: __gf-list-unique($_subset))));
+      }
+
+      // ------------------------------------------------
+      //  Create combined import query
+      // ------------------------------------------------
+      $query:'';
+      $subsets:();
+      @each $key, $font in $combine-map {
+        $_name  : map-get($font, name); 
+        $_weight: map-get($font, weight);
+        $_subset: map-get($font, subset);
+        $query: #{$query}#{if($query != '', '|', '')};
+        $query: #{$query}#{$_name};
+        $query: #{$query}#{':'+$_weight};
+        $subsets: join($subsets, $_subset, comma);
+      }
+      
+      // Remove redundant subsets and spaces
+      $subsets: __gf-list-unique($subsets); 
+      $query: #{$query}#{if(length($subsets)>0, '&subset='+$subsets, '')};
+      $query: __gf-str-replace($query, ' ','');
+      
+      // Create combined import
+      @import url(#{$URL}#{$query});
+ 
+ 
+      // ------------------------------------------------
+      //  Reset combine marker and enpty font list
+      // ------------------------------------------------
+      $__gf-combine: false !global;
+      $__gf-list: () !global;
+    } 
+    // _________________________________________________________________
+    // 
+    //  Catch all (e.g. when only nested include is using text)
+    // _________________________________________________________________
+    @else {
+        @content;
+    }
+  }
+  // Variables for internal use  
+  $__gf-list:();
+  $__gf-combine: false;
+  // Helper functions (SassyLists ripoff)
+  @function ___gf-list-to-list($value, $separator: list-separator($value)) { @if type-of($value) != "list" or list-separator($value) != $separator { $new-list: if($separator == "comma", sl-comma-list(), ()); @each $item in $value { $new-list: append($new-list, $item, $separator); } @return $new-list; } @return $value; }
+  @function ___gf-list-unique($list) { $result: (); @each $item in $list { @if not index($result, $item) { $result: append($result, $item, list-separator($list)); }} @return ___gf-list-to-list($result); }
+  @function ___gf-list-explode($string, $delimiter: '', $separator: "space") { $result: (); $length: str-length($string); @if not index("space" "comma", $separator) { $separator: "space"; }@if str-length($delimiter) == 0 {@for $i from 1 through $length { $result: append($result, str-slice($string, $i, $i)); } @return $result; } $running: true; $remaining: $string; @while $running { $index: str-index($remaining, $delimiter); @if not $index { $running: false; } @else { $slice: str-slice($remaining, 1, $index - 1); $result: append($result, $slice, $separator); $remaining: str-slice($remaining, $index + str-length($delimiter)); } } @return append($result, $remaining, $separator); }
+  // Map helper functions 
+  // If SassyLists are imported we use the real thing
+  @function __gf-str-replace($string, $search, $replace: '') {$index: str-index($string, $search); @if $index { @return str-slice($string, 1, $index - 1) + $replace + __gf-str-replace(str-slice($string, $index + str-length($search)), $search, $replace); }@return $string; }
+  @function __gf-list-unique($arglist...) { @return if(function-exists(sl-remove-duplicates), sl-remove-duplicates($arglist...), ___gf-list-unique($arglist...)); }
+  @function __gf-list-explode($arglist...){ @return if(function-exists(sl-explode), sl-explode($arglist...), ___gf-list-explode($arglist...)); }
+
+
+
+
