@@ -5,10 +5,11 @@
 // _____________________________________________________________________
 //
 //
-// _____________________________________________________________________
+// _________________________________________________________________
 //
 //  Gonfig
-// _____________________________________________________________________
+//  
+// _________________________________________________________________
 // 
 //  To provide flexibility google-font can be set to handle multiple 
 //  fonts, weights and styles in one include. This does not affect 
@@ -52,17 +53,7 @@ $google-font-subsets: (
 
 
 
-// _____________________________________________________________________
-//
-//  The Mixin
-//
-//  $name  : string or list (if $google-font-enable-multi-fonts=true)
-//  $weight: number or list (if $google-font-enable-multi-weights=true)
-//  $style : string or list (if $google-font-enable-multi-styles=true)
-//  $text  : string
-//  $subset: string or list
-// 
-// _____________________________________________________________________
+
 @mixin google-font($name: null, $weight: 400, $style: normal, $text: null, $subset: null){
 
     $URL    : '//fonts.googleapis.com/css?family=';
@@ -74,6 +65,7 @@ $google-font-subsets: (
     // _________________________________________________________________
     // 
     //  Import or add to font list
+    // 
     // _________________________________________________________________
     @if $name {
         @if $google-font-enable-multi-fonts   == false { $name: inspect(unquote($name)); }
@@ -162,7 +154,10 @@ $google-font-subsets: (
         @for $i from 1 through length($_name){
             $query: #{$query}#{if($i > 1,'|','')};
             $query: #{$query}#{nth($_name, $i)};
-            $query: #{$query}#{':'+$_weight};
+            // We don't need weight if we only request normal (400)
+            @if not(length($_weight) == 1 and nth($_weight, 1) == 400) {
+                $query: #{$query}#{':'+$_weight};  
+            }
         }
         //  We don't need subset when passing text
         @if not $text {
@@ -194,7 +189,7 @@ $google-font-subsets: (
 // 
 // _________________________________________________________________
 
-@elseif length($__gf-list) > 0 {
+@else {
     // ------------------------------------------------
     // Set combine marker and include nested 
     // content (now in a combine syntax)
@@ -207,53 +202,49 @@ $google-font-subsets: (
     //  Loop throug each item in the font list and
     //  merge values with already mapped values 
     // ------------------------------------------------
-    //  Map to hold combined fonts
-    $combine-map:();
-    @for $i from 1 through length($__gf-list){
-        $font  : nth($__gf-list, $i);
-        $name  : map-get($font, name);  
-        $mapped: map-get($combine-map, to-lower-case($name));
-        $_weight: join(if($mapped,map-get($mapped, weight),()), map-get($font, weight), comma);
-        $_subset: join(if($mapped,map-get($mapped, subset),()), map-get($font, subset), comma);
-        $combine-map: map-merge($combine-map, (to-lower-case($name):(name: $name, weight: __gf-list-unique($_weight), subset: __gf-list-unique($_subset))));
+    @if length($__gf-list) > 0 {
+        //  Map to hold combined fonts
+        $combine-map:();        
+        @for $i from 1 through length($__gf-list){
+            $font  : nth($__gf-list, $i);
+            $name  : map-get($font, name);  
+            $mapped: map-get($combine-map, to-lower-case($name));
+            $_weight: join(if($mapped,map-get($mapped, weight),()), map-get($font, weight), comma);
+            $_subset: join(if($mapped,map-get($mapped, subset),()), map-get($font, subset), comma);
+            $combine-map: map-merge($combine-map, (to-lower-case($name):(name: $name, weight: __gf-list-unique($_weight), subset: __gf-list-unique($_subset))));
+        }
+
+        // ------------------------------------------------
+        //  Create combined import query
+        // ------------------------------------------------
+        $query:'';
+        $subsets:();
+        @each $key, $font in $combine-map {
+            $_name  : map-get($font, name); 
+            $_weight: map-get($font, weight);
+            $_subset: map-get($font, subset);
+            $query: #{$query}#{if($query != '', '|', '')};
+            $query: #{$query}#{$_name};
+            @if not(length($_weight) == 1 and nth($_weight, 1) == 400) {
+                $query: #{$query}#{':'+$_weight};
+            }            
+            $subsets: join($subsets, $_subset, comma);
+        }
+
+        // Remove redundant subsets and spaces
+        $subsets: __gf-list-unique($subsets); 
+        $query: #{$query}#{if(length($subsets)>0, '&subset='+$subsets, '')};
+        $query: __gf-str-replace($query, ' ','');
+
+        // Create combined import
+        @import url(#{$URL}#{$query});
     }
-
-    // ------------------------------------------------
-    //  Create combined import query
-    // ------------------------------------------------
-    $query:'';
-    $subsets:();
-    @each $key, $font in $combine-map {
-        $_name  : map-get($font, name); 
-        $_weight: map-get($font, weight);
-        $_subset: map-get($font, subset);
-        $query: #{$query}#{if($query != '', '|', '')};
-        $query: #{$query}#{$_name};
-        $query: #{$query}#{':'+$_weight};
-        $subsets: join($subsets, $_subset, comma);
-    }
-
-    // Remove redundant subsets and spaces
-    $subsets: __gf-list-unique($subsets); 
-    $query: #{$query}#{if(length($subsets)>0, '&subset='+$subsets, '')};
-    $query: __gf-str-replace($query, ' ','');
-
-    // Create combined import
-    @import url(#{$URL}#{$query});
-
 
     // ------------------------------------------------
     //  Reset combine marker and enpty font list
     // ------------------------------------------------
     $__gf-combine: false !global;
     $__gf-list: () !global;
-} 
-// _________________________________________________________________
-// 
-//  Catch all (e.g. when only nested include is using text)
-// _________________________________________________________________
-@else {
-    @content;
 }
 }
 // Variables for internal use  
