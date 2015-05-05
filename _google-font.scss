@@ -68,7 +68,7 @@ $google-font-subsets: (
     // 
     // _________________________________________________________________
     @if $name {
-        @if $google-font-enable-multi-fonts   == false { $name: inspect(unquote($name)); }
+        @if $google-font-enable-multi-fonts   == false { $name: #{$name}; }
         @if $google-font-enable-multi-weights == false and type-of($weight) == list { $weight: nth($weight, 1); }      
         @if $google-font-enable-multi-styles  == false and type-of($style) == list  { $style : nth($style,  1); }
         @if type-of($name)   == string { $_name  : append((), $name,   comma); } 
